@@ -143,7 +143,7 @@ export function LoginScreen() {
                   placeholder="Enter your private access code"
                   autoComplete="current-password"
                   autoFocus
-                  disabled={submitting || !accessCodeConfigured}
+                  disabled={submitting || !accessCodeConfigured || Boolean(statusError)}
                   className="w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 px-3.5 py-2.5 pr-11 text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:border-blue-600 dark:focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600/20 disabled:opacity-50"
                 />
                 <button
@@ -169,7 +169,7 @@ export function LoginScreen() {
 
             <button
               type="submit"
-              disabled={submitting || !accessCode.trim() || !accessCodeConfigured}
+              disabled={submitting || !accessCode.trim() || !accessCodeConfigured || Boolean(statusError)}
               className="w-full rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none px-4 py-2.5 text-sm font-medium text-white transition-colors min-h-[42px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900"
             >
               {submitting ? 'Verifying...' : 'Sign in'}

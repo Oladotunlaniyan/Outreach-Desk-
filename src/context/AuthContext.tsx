@@ -57,9 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       const message =
-        err instanceof ApiError
-          ? err.message
-          : 'Unable to reach the Outreach Desk server.';
+        err instanceof ApiError && err.status === 404
+          ? 'Backend API endpoints (/api/*) returned 404. This host appears to be serving only static frontend files rather than the Node.js server (npm run start).'
+          : err instanceof ApiError
+            ? err.message
+            : 'Unable to reach the Outreach Desk server.';
       setStatusError(message);
       setIsAuthenticated(false);
     } finally {

@@ -221,7 +221,7 @@ export function ResearchPage({
     try {
       const [aiRes, senderRes, mailboxRes] = await Promise.allSettled([
         apiFetch<AiStatusResponse>('/api/ai/status'),
-        apiFetch<SenderProfileResponse>('/api/ai/sender-profile'),
+        apiFetch<SenderProfileResponse>('/api/sender-profile'),
         apiFetch<MailboxesListResponse>('/api/mailboxes'),
       ]);
       if (aiRes.status === 'fulfilled') {
