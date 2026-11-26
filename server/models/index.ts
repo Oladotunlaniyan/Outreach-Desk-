@@ -73,3 +73,21 @@ export {
   type UnsubscribeTokenDocument,
 } from './UnsubscribeToken.ts';
 export { LoginAttempt, type LoginAttemptDocument } from './LoginAttempt.ts';
+export {
+  LeadResearchJob,
+  EMAIL_CONFIDENCE_LEVELS,
+  PROSPECT_REVIEW_STATUSES,
+  RESEARCH_JOB_STATUSES,
+  type EmailConfidenceLevel,
+  type LeadResearchJobDocument,
+  type ProspectReviewStatus,
+  type ResearchCandidateEntry,
+  type ResearchJobStatus,
+  type ResearchProspectDraftEmail,
+  type ResearchProspectSubdoc,
+} from './LeadResearchJob.ts';
+export {
+  ResearchCache,
+  type ResearchCacheDocument,
+  type ResearchCacheKind,
+} from './ResearchCache.ts';

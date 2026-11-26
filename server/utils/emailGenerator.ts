@@ -60,6 +60,7 @@ const recipientInputSchema = z
     industry: z.string().trim().max(120).optional().default(''),
     website: z.string().trim().max(250).optional().default(''),
     notes: z.string().trim().max(2000).optional().default(''),
+    researchSourceUrls: z.array(z.string().trim().max(500)).max(6).optional().default([]),
   })
   .optional();
 
@@ -308,6 +309,7 @@ export interface EmailGeneratorDeps {
   signal?: AbortSignal;
   senderProfileOverride?: SenderProfileDataShape | null;
   skipUsageLogging?: boolean;
+  generationType?: AiGenerationType;
 }
 
 export class EmailGeneratorValidationError extends Error {
@@ -350,6 +352,7 @@ export interface SanitizedLeadContext {
   }>;
   hasAmbiguousDelivery: boolean;
   totalOutboundAttempts: number;
+  researchSourceUrls: string[];
 }
 
 export interface PrioritizedLeadBrief {
@@ -580,6 +583,12 @@ export async function buildSafeLeadContext(
       previousEmails,
       hasAmbiguousDelivery,
       totalOutboundAttempts,
+      researchSourceUrls: Array.isArray(manualRecipient?.researchSourceUrls)
+        ? manualRecipient.researchSourceUrls
+            .map((u) => scrubUntrustedText(u, 400))
+            .filter(Boolean)
+            .slice(0, 6)
+        : [],
     };
   }
 
@@ -608,6 +617,12 @@ export async function buildSafeLeadContext(
     previousEmails: [],
     hasAmbiguousDelivery: false,
     totalOutboundAttempts: 0,
+    researchSourceUrls: Array.isArray(manualRecipient?.researchSourceUrls)
+      ? manualRecipient.researchSourceUrls
+          .map((u) => scrubUntrustedText(u, 400))
+          .filter(Boolean)
+          .slice(0, 6)
+      : [],
   };
 }
 
@@ -698,6 +713,10 @@ export function buildPrioritizedLeadBrief(
   const dataRichness: 'rich' | 'moderate' | 'minimal' =
     signalCount >= 5 ? 'rich' : signalCount >= 2 ? 'moderate' : 'minimal';
 
+  if (ctx.researchSourceUrls.length > 0) {
+    relevantFacts.verifiedResearchSources = ctx.researchSourceUrls;
+  }
+
   return {
     recipient: {
       greetingName,
@@ -710,7 +729,9 @@ export function buildPrioritizedLeadBrief(
     secondaryBackground,
     missingFields,
     externalResearchBoundary:
-      'No live web research was performed. Do not imply you read their blog, product docs, recent news, or LinkedIn posts unless explicitly stated inside relevantFacts.',
+      ctx.researchSourceUrls.length > 0
+        ? 'Use ONLY the verified research notes and source URLs explicitly inside relevantFacts. Do not claim you read anything else outside relevantFacts or invent unverified details.'
+        : 'No live web research was performed. Do not imply you read their blog, product docs, recent news, or LinkedIn posts unless explicitly stated inside relevantFacts.',
   };
 }
 
@@ -1340,7 +1361,7 @@ SECTION B — STRUCTURED CONTEXT & UNTRUSTED REFERENCE DATA (sender facts, lead 
 ${wrapUntrustedJson(untrustedContextPayload)}`;
 
   const { parsed, result } = await executeStructuredCompletion(
-    'generate',
+    deps.generationType ?? 'generate',
     [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },

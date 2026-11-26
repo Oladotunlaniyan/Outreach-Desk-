@@ -14,7 +14,8 @@
     "eval:live": "tsx server/evals/emailQualityEval.ts --live",
     "test:phase3c2": "tsx server/evals/phase3c2Tests.ts",
     "test:phase4": "tsx server/evals/phase4Tests.ts",
-    "test:phase5": "tsx server/evals/phase5Tests.ts"
+    "test:phase5": "tsx server/evals/phase5Tests.ts",
+    "test:research": "tsx server/evals/aiResearchTests.ts"
   },
   "dependencies": {
     "@dnd-kit/react": "^0.5.3",

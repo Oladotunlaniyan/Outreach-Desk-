@@ -10,7 +10,7 @@ interface SectionMeta {
 
 type ScaffoldPageId = Exclude<
   PageId,
-  'overview' | 'leads' | 'import' | 'pipeline' | 'outbox' | 'settings'
+  'overview' | 'leads' | 'research' | 'import' | 'pipeline' | 'outbox' | 'settings'
 >;
 
 const SECTION_META: Record<ScaffoldPageId, SectionMeta> = {

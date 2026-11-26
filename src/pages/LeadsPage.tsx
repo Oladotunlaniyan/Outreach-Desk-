@@ -5,6 +5,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Compass,
   Edit3,
   Kanban,
   LayoutList,
@@ -43,6 +44,7 @@ interface LeadsPageProps {
   viewMode: LeadsViewMode;
   onChangeViewMode: (mode: LeadsViewMode) => void;
   onNavigateToImport: () => void;
+  onNavigateToResearch?: () => void;
   onNavigateToSettings?: () => void;
   onLeadMutated?: () => void;
 }
@@ -74,6 +76,7 @@ export function LeadsPage({
   viewMode,
   onChangeViewMode,
   onNavigateToImport,
+  onNavigateToResearch,
   onNavigateToSettings,
   onLeadMutated,
 }: LeadsPageProps) {
@@ -521,6 +524,17 @@ export function LeadsPage({
               <span>Board View</span>
             </button>
           </div>
+
+          {onNavigateToResearch && (
+            <button
+              type="button"
+              onClick={onNavigateToResearch}
+              className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors min-h-[40px] whitespace-nowrap shrink-0"
+            >
+              <Compass className="h-4 w-4" />
+              <span>AI Research</span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -1003,11 +1017,15 @@ export function LeadsPage({
         onClose={() => setSelectedLeadId(null)}
         onEditLead={(lead) => openEditModal(lead)}
         onDraftEmail={(lead) => {
+          const savedSubject = lead.customFields?.aiDraftSubject?.trim() || '';
+          const savedBody = lead.customFields?.aiDraftBody?.trim() || '';
           setComposerDraft({
             leadId: lead.id,
             to: lead.email,
             mailboxId: lead.lastSenderId || undefined,
-            openAiAssistant: true,
+            ...(savedSubject ? { subject: savedSubject } : {}),
+            ...(savedBody ? { text: savedBody } : {}),
+            openAiAssistant: !(savedSubject && savedBody),
           });
           setComposerOpen(true);
         }}

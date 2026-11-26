@@ -1,6 +1,7 @@
 export type PageId =
   | 'overview'
   | 'leads'
+  | 'research'
   | 'import'
   | 'campaigns'
   | 'pipeline'
@@ -933,4 +934,140 @@ export interface SuppressionsListResponse {
     totalPages: number;
   };
 }
+
+export type ResearchJobStatus =
+  | 'Pending'
+  | 'Running'
+  | 'Paused'
+  | 'Completed'
+  | 'Failed'
+  | 'Cancelled';
+
+export type EmailConfidenceLevel =
+  | 'verified_published'
+  | 'published_generic'
+  | 'inferred_unverified'
+  | 'not_found';
+
+export type ProspectReviewStatus = 'pending' | 'approved' | 'rejected' | 'imported';
+
+export interface ResearchProspectDraftEmail {
+  subject: string;
+  text: string;
+  html: string;
+  personalizationNotes: string[];
+  missingInformation: string[];
+  generatedAt: string | null;
+  model: string;
+  senderProfileUsed: boolean;
+  edited: boolean;
+}
+
+export interface ResearchProspectItem {
+  id: string;
+  company: string;
+  domain: string;
+  industry: string;
+  location: string;
+  website: string;
+  businessSummary: string;
+  fullName: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  email: string;
+  emailConfidence: EmailConfidenceLevel;
+  emailEvidence: {
+    foundOnUrl: string;
+    contactType: 'personal' | 'role_based' | 'snippet_only' | 'none';
+    verificationNote: string;
+  };
+  sourceUrls: string[];
+  linkedinUrl: string;
+  relevanceNotes: string;
+  duplicateStatus: {
+    isDuplicate: boolean;
+    matchType: 'none' | 'email' | 'website_domain' | 'company_and_location' | 'suppressed';
+    existingLeadId?: string;
+    existingLeadName?: string;
+    existingLeadEmail?: string;
+    reason: string;
+  };
+  reviewStatus: ProspectReviewStatus;
+  importedLeadId: string | null;
+  draftEmail: ResearchProspectDraftEmail | null;
+}
+
+export interface ResearchJobItem {
+  id: string;
+  query: {
+    industry: string;
+    location: string;
+    targetRoles: string[];
+    desiredCount: number;
+    notes: string;
+  };
+  status: ResearchJobStatus;
+  progress: {
+    totalTarget: number;
+    discoveredCount: number;
+    verifiedEmailCount: number;
+    importedCount: number;
+    searchedQueriesCount: number;
+    crawledSitesCount: number;
+    batchSize: number;
+    currentBatch: number;
+    processedCandidateCount: number;
+    totalCandidatesQueued: number;
+    lastStepMessage: string;
+  };
+  searchQueriesExecuted: string[];
+  prospects: ResearchProspectItem[];
+  lastError: {
+    code: string;
+    message: string;
+    retryAfterSeconds: number | null;
+    at: string | null;
+  } | null;
+  resumeAfter: string | null;
+  startedAt: string | null;
+  pausedAt: string | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ResearchJobsListResponse {
+  jobs: ResearchJobItem[];
+}
+
+export interface ResearchJobResponse {
+  job: ResearchJobItem;
+}
+
+export interface ResearchGenerateEmailsResponse {
+  ok: boolean;
+  job: ResearchJobItem;
+  generatedCount: number;
+  skippedCount: number;
+  pausedRateLimit: boolean;
+  retryAfterSeconds?: number;
+  warning?: string;
+}
+
+export interface ResearchImportResponse {
+  ok: boolean;
+  job: ResearchJobItem;
+  summary: {
+    requestedCount: number;
+    importedCount: number;
+    skippedExistingCount: number;
+    skippedSuppressedCount: number;
+    skippedNoEmailCount: number;
+    skippedUnverifiedCount: number;
+  };
+  campaign?: CampaignItem;
+  campaignWarning?: string;
+}
+
 

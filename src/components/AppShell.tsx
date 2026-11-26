@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import {
+  Compass,
   Kanban,
   LayoutDashboard,
   LogOut,
@@ -27,6 +28,7 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { id: 'overview', label: 'Overview', icon: LayoutDashboard },
   { id: 'leads', label: 'Leads', icon: Users },
+  { id: 'research', label: 'AI Research', icon: Compass },
   { id: 'import', label: 'Import', icon: Upload },
   { id: 'campaigns', label: 'Campaigns', icon: Send },
   { id: 'pipeline', label: 'Pipeline', icon: Kanban },

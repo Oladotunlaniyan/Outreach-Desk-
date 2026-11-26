@@ -9,6 +9,7 @@ import { ImportPage } from './pages/ImportPage';
 import { LeadsPage, type LeadsViewMode } from './pages/LeadsPage';
 import { OutboxPage } from './pages/OutboxPage';
 import { OverviewPage } from './pages/OverviewPage';
+import { ResearchPage } from './pages/ResearchPage';
 import { SettingsPage } from './pages/SettingsPage';
 import type { PageId } from './types/outreach';
 
@@ -93,8 +94,28 @@ function DeskRouter() {
             setActivePage(mode === 'board' ? 'pipeline' : 'leads');
           }}
           onNavigateToImport={() => setActivePage('import')}
+          onNavigateToResearch={() => setActivePage('research')}
           onNavigateToSettings={() => setActivePage('settings')}
           onLeadMutated={() => setOverviewRefreshSignal((prev) => prev + 1)}
+        />
+      )}
+      {activePage === 'research' && (
+        <ResearchPage
+          onNavigateToLeads={() => {
+            setLeadsRefreshSignal((prev) => prev + 1);
+            setLeadsViewMode('list');
+            setActivePage('leads');
+          }}
+          onNavigateToCampaigns={() => {
+            setCampaignsRefreshSignal((prev) => prev + 1);
+            setActivePage('campaigns');
+          }}
+          onNavigateToSettings={() => setActivePage('settings')}
+          onImported={() => {
+            setLeadsRefreshSignal((prev) => prev + 1);
+            setCampaignsRefreshSignal((prev) => prev + 1);
+            setOverviewRefreshSignal((prev) => prev + 1);
+          }}
         />
       )}
       {activePage === 'campaigns' && (

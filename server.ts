@@ -19,7 +19,9 @@ import { senderProfileRouter } from './server/routes/senderProfile.ts';
 import { settingsRouter } from './server/routes/settings.ts';
 import { suppressionsRouter } from './server/routes/suppressions.ts';
 import { unsubscribeRouter } from './server/routes/unsubscribe.ts';
+import { researchRouter } from './server/routes/research.ts';
 import { recoverInterruptedCampaigns } from './server/utils/campaignWorker.ts';
+import { recoverInterruptedResearchJobs } from './server/utils/leadResearcher.ts';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,6 +52,7 @@ async function bootstrap() {
   app.use('/api/emails', emailsRouter);
   app.use('/api/leads', leadsRouter);
   app.use('/api/mailboxes', mailboxesRouter);
+  app.use('/api/research', researchRouter);
   app.use('/api/sender-profile', senderProfileRouter);
   app.use('/api/settings', settingsRouter);
   app.use('/api/suppressions', suppressionsRouter);
@@ -93,9 +96,15 @@ async function bootstrap() {
     }
     void connectDatabase().then(async (connected) => {
       if (connected) {
-        const recovered = await recoverInterruptedCampaigns();
-        if (recovered > 0) {
-          logEvent('info', 'worker.startup_recovered', { recoveredCount: recovered });
+        const [recoveredCampaigns, recoveredResearch] = await Promise.all([
+          recoverInterruptedCampaigns(),
+          recoverInterruptedResearchJobs(),
+        ]);
+        if (recoveredCampaigns > 0) {
+          logEvent('info', 'worker.startup_recovered', { recoveredCount: recoveredCampaigns });
+        }
+        if (recoveredResearch > 0) {
+          logEvent('info', 'research.startup_recovered', { recoveredCount: recoveredResearch });
         }
       }
     });

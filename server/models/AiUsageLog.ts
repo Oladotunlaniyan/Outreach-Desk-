@@ -9,6 +9,8 @@ export const AI_GENERATION_TYPES = [
   'change_tone',
   'subject_lines',
   'cta',
+  'lead_research',
+  'research_first_touch',
 ] as const;
 
 export type AiGenerationType = (typeof AI_GENERATION_TYPES)[number];
