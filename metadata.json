@@ -1,0 +1,6 @@
+{
+  "name": "Outreach Desk",
+  "description": "Private personal outreach management desk for leads, campaigns, SMTP mailboxes, and AI-assisted research.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
