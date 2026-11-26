@@ -3,23 +3,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import express from 'express';
+import { createApiApp } from './server/app.ts';
 import { connectDatabase } from './server/config/db.ts';
 import { getEnvConfig, getProductionReadinessReport } from './server/config/env.ts';
 import { logEvent } from './server/utils/logger.ts';
-import { aiRouter } from './server/routes/ai.ts';
-import { authRouter } from './server/routes/auth.ts';
-import { bouncesRouter } from './server/routes/bounces.ts';
-import { campaignsRouter } from './server/routes/campaigns.ts';
-import { dashboardRouter } from './server/routes/dashboard.ts';
-import { emailsRouter } from './server/routes/emails.ts';
-import { healthRouter } from './server/routes/health.ts';
-import { leadsRouter } from './server/routes/leads.ts';
-import { mailboxesRouter } from './server/routes/mailboxes.ts';
-import { senderProfileRouter } from './server/routes/senderProfile.ts';
-import { settingsRouter } from './server/routes/settings.ts';
-import { suppressionsRouter } from './server/routes/suppressions.ts';
-import { unsubscribeRouter } from './server/routes/unsubscribe.ts';
-import { researchRouter } from './server/routes/research.ts';
 import { recoverInterruptedCampaigns } from './server/utils/campaignWorker.ts';
 import { recoverInterruptedResearchJobs } from './server/utils/leadResearcher.ts';
 
@@ -28,39 +15,7 @@ const __dirname = path.dirname(__filename);
 
 async function bootstrap() {
   const env = getEnvConfig();
-  const app = express();
-
-  app.set('trust proxy', 1);
-  app.disable('x-powered-by');
-
-  app.use((_req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
-    next();
-  });
-
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: false }));
-
-  app.use('/api/health', healthRouter);
-  app.use('/api/ai', aiRouter);
-  app.use('/api/auth', authRouter);
-  app.use('/api/bounces', bouncesRouter);
-  app.use('/api/campaigns', campaignsRouter);
-  app.use('/api/dashboard', dashboardRouter);
-  app.use('/api/emails', emailsRouter);
-  app.use('/api/leads', leadsRouter);
-  app.use('/api/mailboxes', mailboxesRouter);
-  app.use('/api/research', researchRouter);
-  app.use('/api/sender-profile', senderProfileRouter);
-  app.use('/api/settings', settingsRouter);
-  app.use('/api/suppressions', suppressionsRouter);
-  app.use('/api/unsubscribe', unsubscribeRouter);
-
-  app.use('/api', (_req, res) => {
-    res.status(404).json({ error: 'API endpoint not found.', code: 'NOT_FOUND' });
-  });
+  const app = createApiApp({ ensureDbOnRequest: false });
 
   if (env.nodeEnv !== 'production') {
     const { createServer: createViteServer } = await import('vite');

@@ -18,6 +18,7 @@ export interface DatabaseStatus {
 let lastDbError: string | null = null;
 let listenersAttached = false;
 let isConnectingAttempt = false;
+let inFlightConnect: Promise<boolean> | null = null;
 
 function formatMongoError(err: unknown): string {
   const raw = err instanceof Error ? err.message : String(err || 'MongoDB connection error');
@@ -83,6 +84,10 @@ export async function connectDatabase(): Promise<boolean> {
     return true;
   }
 
+  if (inFlightConnect) {
+    return inFlightConnect;
+  }
+
   if (!listenersAttached) {
     listenersAttached = true;
     mongoose.connection.on('connected', () => {
@@ -103,29 +108,34 @@ export async function connectDatabase(): Promise<boolean> {
     });
   }
 
-  isConnectingAttempt = true;
-  try {
-    if (mongoose.connection.readyState !== 0) {
-      await mongoose.disconnect().catch(() => {});
-    }
+  inFlightConnect = (async () => {
+    isConnectingAttempt = true;
+    try {
+      if (mongoose.connection.readyState !== 0) {
+        await mongoose.disconnect().catch(() => {});
+      }
 
-    await mongoose.connect(mongodbUri, {
-      serverSelectionTimeoutMS: 10000,
-      connectTimeoutMS: 10000,
-      socketTimeoutMS: 45000,
-      maxPoolSize: 10,
-      family: 4,
-    });
-    lastDbError = null;
-    const { verifyLeadEmailIntegrity } = await import('../utils/leadIntegrity.ts');
-    const integrity = await verifyLeadEmailIntegrity();
-    console.log(`[Outreach Desk] Lead index check (${integrity.status}): ${integrity.message}`);
-    return true;
-  } catch (err) {
-    lastDbError = formatMongoError(err);
-    console.warn('[Outreach Desk] MongoDB Atlas unavailable:', lastDbError);
-    return false;
-  } finally {
-    isConnectingAttempt = false;
-  }
+      await mongoose.connect(mongodbUri, {
+        serverSelectionTimeoutMS: 10000,
+        connectTimeoutMS: 10000,
+        socketTimeoutMS: 45000,
+        maxPoolSize: 10,
+        family: 4,
+      });
+      lastDbError = null;
+      const { verifyLeadEmailIntegrity } = await import('../utils/leadIntegrity.ts');
+      const integrity = await verifyLeadEmailIntegrity();
+      console.log(`[Outreach Desk] Lead index check (${integrity.status}): ${integrity.message}`);
+      return true;
+    } catch (err) {
+      lastDbError = formatMongoError(err);
+      console.warn('[Outreach Desk] MongoDB Atlas unavailable:', lastDbError);
+      return false;
+    } finally {
+      isConnectingAttempt = false;
+      inFlightConnect = null;
+    }
+  })();
+
+  return inFlightConnect;
 }
