@@ -57,8 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       const message =
-        err instanceof ApiError && err.status === 404
-          ? 'Backend API endpoints (/api/*) returned 404. This host appears to be serving only static frontend files rather than the Node.js server (npm run start).'
+        err instanceof ApiError && err.status === 404 && err.code !== 'NOT_FOUND'
+          ? 'Backend API endpoints (/api/*) returned 404. No Node/serverless API handler responded at /api/auth/status on this host.'
           : err instanceof ApiError
             ? err.message
             : 'Unable to reach the Outreach Desk server.';

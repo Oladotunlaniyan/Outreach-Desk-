@@ -9,12 +9,14 @@ function normalizeVercelApiUrl(rawUrl: string | undefined): string {
 
   if (pathParam !== null) {
     url.searchParams.delete('__path');
-    const isRewrittenToIndex =
-      url.pathname === '/api/index' ||
+    const isRewrittenToEntry =
+      url.pathname === '/api/handler.js' ||
+      url.pathname === '/api/handler' ||
       url.pathname === '/api/index.js' ||
+      url.pathname === '/api/index' ||
       url.pathname === '/api';
 
-    if (isRewrittenToIndex) {
+    if (isRewrittenToEntry) {
       const normalizedSubpath = pathParam.replace(/^\/+/, '');
       url.pathname = normalizedSubpath ? `/api/${normalizedSubpath}` : '/api';
     }
