@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "tsx server.ts",
     "start": "node server.ts",
-    "build": "vite build && esbuild server/vercelEntry.ts --bundle --platform=node --format=esm --packages=external --outfile=api/index.mjs",
+    "build": "vite build && esbuild server/vercelEntry.ts --bundle --platform=node --format=esm --packages=external --outfile=api/index.js",
     "preview": "vite preview",
-    "clean": "rm -rf dist server.js",
+    "clean": "rm -rf dist api/index.js",
     "lint": "tsc --noEmit",
     "eval:offline": "tsx server/evals/emailQualityEval.ts",
     "eval:live": "tsx server/evals/emailQualityEval.ts --live",
